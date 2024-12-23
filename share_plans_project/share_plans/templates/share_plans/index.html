@@ -1,5 +1,31 @@
 {% extends "share_plans/layout.html" %}
 
 {% block body %}
-    <h1>Hello!</h1>
+    <input type="hidden" id="inp-year" name="year" value="{{year}}">
+    <input type="hidden" id="inp-month" name="month" value="{{month_num}}">
+    <div class="header-inputs">
+        <button class="change-month btn btn-primary" id="prev-month-btn">&lt;-</button>
+        <div>
+            <h1>{{ month }} - {{ year }}</h1>
+        </div>
+        <button class="change-month btn btn-primary" id="next-month-btn">-&gt;</button>
+    </div>
+    <h5>Расписание - {{ current_user.username }}</h5>
+    <form>
+        <label for="monthInput">Укажите месяц:</label>
+        <input type="month" list="monthList" id="monthInput">
+    </form>
+      
+    <div class="planner" id="december">
+        {% for event in range %}
+            <a href="/user/{{current_user.id}}/date?year={{event.year}}&month={{event.month}}&day={{event.day}}" class="day" data-day="{{event.day}}">
+                <p style="font-weight: bold;">{{ event.day }}</p>
+                {% for ev in event.events %}
+                    <hr style="width: 100%;">
+                    <div>{{ ev.time }} - {{ ev.time_to }} {{ ev.description }}</div>
+                {% endfor %}
+            </a>
+        {% endfor %}
+    </div>
+    
 {% endblock %}

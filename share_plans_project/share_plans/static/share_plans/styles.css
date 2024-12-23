@@ -1,0 +1,135 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /* height: 100vh; */
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+    padding-top: 56px;
+    gap: 1rem
+}
+
+.add-form {
+    display:flex;
+    flex-direction: column;
+}
+
+.time-div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem
+}
+
+.header-inputs {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 3rem
+}
+
+.day {
+    border: 1px solid black;
+}
+
+a {
+    color: black;
+    text-decoration: none; /* no underline */
+}
+
+a:hover {
+    color: black;
+    text-decoration: none; /* no underline */
+}
+
+.planner {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 равных колонок */
+    /* grid-auto-rows: minmax(100px, auto); */
+    gap: 10px; /* Отступы между колонками */
+    height: 100%;
+    width: 100%;
+}
+
+.day {
+    border: 1px solid #ccc; /* Для наглядности добавим границу */
+    padding: 10px;
+    box-sizing: border-box; /* Учитываем padding в размерах */
+    word-wrap: break-word; /* Перенос длинных слов */
+    white-space: normal; /* Разрешаем перенос строк */
+    display: flex;
+    flex-direction: column; /* Текст и вложенные элементы располагаются вертикально */
+    justify-content: flex-start; /* Выравниваем содержимое сверху */
+    align-items: flex-start; /* Выравниваем текст слева */
+    flex-grow: 1;
+}
+
+.event {
+    display: flex; 
+    flex-direction: column; 
+    flex: 1; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+}
+
+#suggestions-list {
+    position: absolute; /* Абсолютное позиционирование */
+    top: 100%; /* Располагаем подсказки сразу под инпутом */
+    left: 0; /* Привязываем к левому краю родителя */
+    width: 100%; /* Ширина подсказок равна ширине инпута */
+    z-index: 1000; /* Устанавливаем высокий z-index, чтобы перекрыть другие элементы */
+    background: white; /* Белый фон для подсказок */
+    border: 1px solid #ddd; /* Граница подсказок */
+    list-style: none; /* Убираем маркеры списка */
+    padding: 0; /* Убираем внутренние отступы */
+    margin: 0; /* Убираем внешние отступы */
+    max-height: 200px; /* Ограничиваем высоту */
+    overflow-y: auto; /* Скролл при превышении высоты */
+  }
+  
+#suggestions-list li {
+    padding: 10px; /* Отступы внутри каждого элемента списка */
+    cursor: pointer; /* Указатель курсора */
+}
+  
+#suggestions-list li:hover {
+    background-color: #f0f0f0; /* Цвет фона при наведении */
+}
+  
+
+ul {
+    list-style: none; /* Убираем стандартные маркеры */
+    text-align: center; /* Центрируем текст внутри списка */
+    padding: 0;
+}
+
+ul li {
+    display: inline-block; /* Отображаем элементы в одной строке */
+    margin: 0 10px; /* Отступы между элементами */
+}
+
+#search-button {
+    border: 1px solid white;
+}
+
+.event:hover {
+    background-color: lightgray;
+    cursor: pointer;
+}
+
+#preview {
+    border: 1px solid #2E9AFF; 
+    border-radius: 50%; 
+    width: 300px; 
+    height: 300px; 
+    object-fit: cover;
+}

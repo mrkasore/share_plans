@@ -1,0 +1,66 @@
+{% extends "share_plans/layout.html" %}
+
+{% block body %}
+    {% if user_profile.avatar %}
+        <img src="{{user_profile.avatar.url}}" id="preview">
+    {% else %}
+        <img src="" id="preview">
+    {% endif %}
+    <h1 id="user_profile" data-user="{{ user_profile.id }}">{{ user_profile }}</h1>
+    {% if is_author %}
+        <form method="post" enctype="multipart/form-data" action="{% url 'change_profile_page' %}" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            {% csrf_token %}
+            <input type="file" id="image" name="image" class="form-control">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    {% endif %}
+    {% if is_approved %}
+        <a href="/user/{{user_profile.id}}">
+            <button class="btn btn-primary">Смотреть расписание</button>
+        </a>
+    {% else %}
+        <h6>Заявка отправлена</h6>
+    {% endif %}
+    {% if not is_author %}
+        {% if is_follower %}
+            <button class="btn btn-primary" id="following">Отписаться</button>
+        {% else %}
+            <button class="btn btn-primary" id="following">Подписаться</button>
+        {% endif %}
+    {% endif %}
+    <h3>Подписки</h3>
+    <ul>
+        {% for follower in following %}
+            <li>
+                <a href="/profile/{{ follower.user.id }}">
+                    <button class="btn btn-dark">{{ follower.user }}</button>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    <h3>Подписчики</h3>
+    <ul id="all-followers">
+        {% for follower in followers_not_approved %}
+            <li id="{{ follower.follower.id }}">
+                <a href="/profile/{{ follower.follower.id }}">
+                    <button class="btn btn-dark">{{ follower.follower }}</button>
+                </a>
+                {% if is_author %}
+                    <button class="btn btn-primary change-approve">+</button>
+                    <button class="btn btn-danger delete-follower">x</button>
+                {% endif %}
+            </li>
+        {% endfor %}
+        {% for follower in followers %}
+            <li id="{{ follower.follower.id }}">
+                <a href="/profile/{{ follower.follower.id }}">
+                    <button class="btn btn-dark">{{ follower.follower }}</button>
+                </a>
+                {% if is_author %}
+                    <button class="btn btn-danger delete-follower">x</button>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+    
+{% endblock %}

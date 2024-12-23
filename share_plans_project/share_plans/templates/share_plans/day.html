@@ -1,0 +1,63 @@
+{% extends "share_plans/layout.html" %}
+
+{% block body %}
+    <h1 style="text-align: center;">Расписание на {{ day }}.{{ month }}.{{ year }}</h1>
+
+    <div style="text-align: center;">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDayModal">
+            +
+        </button>
+    </div>
+      
+      <!-- Modal -->
+    <div class="modal fade" id="addDayModal" tabindex="-1" aria-labelledby="addDayModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addDayModalLabel">Добавить событие</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'add_event' %}" method="post" class="add-form" id="add-event-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="event-id" id="event-id">
+                    <input type="hidden" value="{{ year }}" name="year">
+                    <input type="hidden" value="{{ month }}" name="month">
+                    <input type="hidden" value="{{ day }}" name="day">
+                    <div class="time-div">
+                        <label>Выберите время: </label>
+                        <input type="time" name="time-event" id="time-event">
+                        -
+                        <input type="time" name="time-event_to" id="time-event_to">
+                    </div>
+                    <textarea name="description" id="description"></textarea>
+                    <div style="text-align: center;">
+                      <input type="checkbox" id="repeat" name="is-repeat">
+                      <label for="repeat">Повторять каждую неделю</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Свернуть</button>
+              <button type="submit" class="btn btn-primary" form="add-event-form">Добавить</button>
+            </div>
+          </div>
+        </div>
+    </div>
+    
+    <div style="width: 100vw; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+        {% for event in all_events %}
+            <hr>
+            <div class="event" id="{{event.id}}">
+                <div class="times">{{ event.time }} - {{ event.time_to }}</div>
+                <div class="event-description">{{ event.description }}</div>
+                {% if event.repeat %}
+                  <input type="checkbox" checked class="repeat-inp" style="display: none;">
+                {% else %}
+                  <input type="checkbox" class="repeat-inp" style="display: none;">
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    
+{% endblock %}

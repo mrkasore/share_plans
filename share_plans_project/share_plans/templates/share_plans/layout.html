@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}Share Plans{% endblock %}</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
@@ -17,25 +18,11 @@
                 <div class="form-outline">
                   <input id="search-input" type="search" class="form-control" autocomplete="off" placeholder="Поиск пользователей" />
                 </div>
+                <ul id="suggestions-list" class="list-group" style="display: none;"></ul>
                 <button id="search-button" type="button" class="btn btn-primary">
                   <i class="fas fa-search"></i>
                 </button>
               </div>
-              <ul id="suggestions-list" class="list-group"></ul>
-              
-                <!-- <div class="input-group rounded"> -->
-                    <!-- <div class="input-group"> -->
-                        <!-- <input type="search" class="form-control rounded" placeholder="Поиск пользователя" aria-label="Search" aria-describedby="search-addon" list="character"/>
-                        <datalist id="character">
-                            <option value="Чебурашка"></option>
-                            <option value="Крокодил Гена"></option>
-                            <option value="Шапокляк"></option>
-                           </datalist></p>
-                        <button id="search-button" type="button" class="btn btn-primary">
-                            <i class="fas fa-search"></i>
-                        </button> -->
-                    <!-- </div> -->
-                <!-- </div> -->
           
             <div>
               <ul class="navbar-nav mr-auto">
@@ -44,12 +31,7 @@
                         <a class="nav-link" href="/profile/{{user.id}}"><strong>{{ user.username }}</strong></a>
                     </li>
                 {% endif %}
-                    <!-- <li class="nav-item">
-                        <form>
-                            <input type="search">
-                            <input type="submit" value="Поиск пользователя">
-                        </form>
-                    </li> -->
+
                 {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
@@ -71,7 +53,6 @@
             {% endblock %}
         </div>
 
-
         {% block script %}
             <script src="{% static 'share_plans/scripts.js' %}"></script>
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
@@ -80,11 +61,6 @@
     </body>
 
     <footer>
-        
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
+        Не пропусти ничего важного! Будь в курсе всех событий.
     </footer>
 </html>

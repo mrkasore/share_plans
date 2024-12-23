@@ -9,7 +9,6 @@
         </button>
     </div>
       
-      <!-- Modal -->
     <div class="modal fade" id="addDayModal" tabindex="-1" aria-labelledby="addDayModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen">
           <div class="modal-content">
@@ -45,7 +44,7 @@
         </div>
     </div>
     
-    <div style="width: 100vw; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+    <div class="container-event">
         {% for event in all_events %}
             <hr>
             <div class="event" id="{{event.id}}">

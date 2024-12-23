@@ -43,6 +43,8 @@ def month_page(request, user_id):
     "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
     ]
 
+    list_day_of_week = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+
     if request.method == 'GET' and 'year' in request.GET and 'month' in request.GET:
         year = int(request.GET['year'])
         month = int(request.GET['month'])
@@ -80,6 +82,7 @@ def month_page(request, user_id):
     for week in days_current:
         i = 0
         for day in week:
+            day_of_week = list_day_of_week[i]
             i += 1
 
             if repeat_events[i]:
@@ -95,7 +98,8 @@ def month_page(request, user_id):
                     "day": day,
                     "month": last_month,
                     "year": last_year,
-                    "events": all_events.order_by('time')
+                    "events": all_events.order_by('time'),
+                    "day_of_week": day_of_week
                     })
             elif day == 0:
                 day = res_days_next.pop(0)
@@ -105,7 +109,8 @@ def month_page(request, user_id):
                     "day": day,
                     "month": next_month,
                     "year": next_year,
-                    "events": all_events.order_by('time')
+                    "events": all_events.order_by('time'),
+                    "day_of_week": day_of_week
                     })
             elif day != 0:
                 all_events = current_user.events.all().filter(date=date(year, month, day))
@@ -114,7 +119,8 @@ def month_page(request, user_id):
                     "day": day,
                     "month": month,
                     "year": year,
-                    "events": all_events.order_by('time')
+                    "events": all_events.order_by('time'),
+                    "day_of_week": day_of_week
                     })
                 is_inception = False
 

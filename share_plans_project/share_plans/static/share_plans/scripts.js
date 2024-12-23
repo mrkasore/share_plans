@@ -5,12 +5,14 @@ document.addEventListener('DOMContentLoaded', function() {
     suggestionsList.innerHTML = ""; 
   
     input.addEventListener("input", function () {
-      const query = input.value.trim();
-      if (query.length > 0) {
-        fetchSuggestions(query);
-      } else {
-        suggestionsList.innerHTML = "";
-      }
+        const query = input.value.trim();
+        if (query.length > 0) {
+            suggestionsList.style.display = "block";
+            fetchSuggestions(query);
+        } else {
+            suggestionsList.style.display = "none";
+            suggestionsList.innerHTML = "";
+        }
     });
     
     changeMonth();

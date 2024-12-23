@@ -1,9 +1,34 @@
-body {
+@media (max-width: 400px) {
+    .planner {
+        font-size: 10px;
+    }
+
+    .navbar {
+        justify-content: center;
+    }
+
+    .input-group {
+        justify-content: center;
+    }
+
+    .day {
+        width: 45px;
+        overflow: hidden;
+    }
+    
+}
+
+html, body {
     font-family: 'Roboto', sans-serif;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    /* height: 100vh; */
+    height: 100%;
+}
+
+.navbar {
+    padding: 10px;
+    padding-left: 20px;
 }
 
 .body {
@@ -11,9 +36,12 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    height: 100%;
     padding-top: 56px;
-    gap: 1rem
+    gap: 1rem;
+
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .add-form {
@@ -41,33 +69,32 @@ body {
 
 a {
     color: black;
-    text-decoration: none; /* no underline */
+    text-decoration: none;
 }
 
 a:hover {
     color: black;
-    text-decoration: none; /* no underline */
+    text-decoration: none;
 }
 
 .planner {
     display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 равных колонок */
-    /* grid-auto-rows: minmax(100px, auto); */
-    gap: 10px; /* Отступы между колонками */
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
     height: 100%;
     width: 100%;
 }
 
 .day {
-    border: 1px solid #ccc; /* Для наглядности добавим границу */
+    border: 1px solid #ccc;
     padding: 10px;
-    box-sizing: border-box; /* Учитываем padding в размерах */
-    word-wrap: break-word; /* Перенос длинных слов */
-    white-space: normal; /* Разрешаем перенос строк */
+    box-sizing: border-box;
+    word-wrap: break-word;
+    white-space: normal;
     display: flex;
-    flex-direction: column; /* Текст и вложенные элементы располагаются вертикально */
-    justify-content: flex-start; /* Выравниваем содержимое сверху */
-    align-items: flex-start; /* Выравниваем текст слева */
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
     flex-grow: 1;
 }
 
@@ -82,39 +109,39 @@ a:hover {
 }
 
 #suggestions-list {
-    position: absolute; /* Абсолютное позиционирование */
-    top: 100%; /* Располагаем подсказки сразу под инпутом */
-    left: 0; /* Привязываем к левому краю родителя */
-    width: 100%; /* Ширина подсказок равна ширине инпута */
-    z-index: 1000; /* Устанавливаем высокий z-index, чтобы перекрыть другие элементы */
-    background: white; /* Белый фон для подсказок */
-    border: 1px solid #ddd; /* Граница подсказок */
-    list-style: none; /* Убираем маркеры списка */
-    padding: 0; /* Убираем внутренние отступы */
-    margin: 0; /* Убираем внешние отступы */
-    max-height: 200px; /* Ограничиваем высоту */
-    overflow-y: auto; /* Скролл при превышении высоты */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #ddd;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 200px;
+    overflow-y: auto;
   }
   
 #suggestions-list li {
-    padding: 10px; /* Отступы внутри каждого элемента списка */
-    cursor: pointer; /* Указатель курсора */
+    padding: 10px;
+    cursor: pointer
 }
   
 #suggestions-list li:hover {
-    background-color: #f0f0f0; /* Цвет фона при наведении */
+    background-color: #f0f0f0;
 }
   
 
 ul {
-    list-style: none; /* Убираем стандартные маркеры */
-    text-align: center; /* Центрируем текст внутри списка */
+    list-style: none;
+    text-align: center;
     padding: 0;
 }
 
 ul li {
-    display: inline-block; /* Отображаем элементы в одной строке */
-    margin: 0 10px; /* Отступы между элементами */
+    display: inline-block;
+    margin: 0 10px;
 }
 
 #search-button {
@@ -129,7 +156,31 @@ ul li {
 #preview {
     border: 1px solid #2E9AFF; 
     border-radius: 50%; 
-    width: 300px; 
-    height: 300px; 
+    width: 200px; 
+    height: 200px; 
     object-fit: cover;
+}
+
+footer {
+    margin-top: 10px;
+    display: flex;
+    background-color: #0d6efd;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    min-height: 60px;
+    padding: 10px;
+}
+
+hr {
+    width: 100%;
+    margin: 0;
+}
+
+.container-event {
+    width: 100vw; 
+    height: 100%; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between;
 }

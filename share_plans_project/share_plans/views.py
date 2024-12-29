@@ -205,7 +205,7 @@ def add_event(request):
         day = int(request.POST['day'])
         month = int(request.POST['month'])
         year = int(request.POST['year'])
-        is_repeat = request.POST.get('is-repeat', False)
+        is_repeat = bool(request.POST.get('is-repeat', False))
 
         if request.POST['event-id']:
             event = Event.objects.get(pk=request.POST['event-id'])

@@ -139,3 +139,4 @@ GitHub.sublime-settings
 
 # Keys
 share_plans_project/share_plans_project/secrets.py
+share_plans_project/share_plans_project/secrets_key.py

@@ -72,6 +72,7 @@ function renderSuggestions(suggestions) {
       li.addEventListener("click", () => {
         input.value = item;
         suggestionsList.innerHTML = "";
+        document.querySelector('#search-button').focus();
       });
       suggestionsList.appendChild(li);
     });
@@ -106,9 +107,15 @@ function following(csrftoken) {
                         let elHref = document.createElement('a');
                         let url = `/profile/${result.user_id}`;
                         elHref.setAttribute('href', url);
-                        elHref.innerHTML = result.username;
+                        let elBtnBlack = document.createElement('button');
+                        elBtnBlack.className = "btn btn-dark";
+                        elBtnBlack.innerHTML = result.username;
+                        elHref.append(elBtnBlack);
                         elUser.append(elHref);
                         all_followers.append(elUser);
+                        let infoStatus = document.createElement('h5');
+                        infoStatus.innerHTML = 'Заявка отправлена'
+                        document.querySelector('#user_profile').after(infoStatus);
                     }
                 })
         });
@@ -185,7 +192,6 @@ function editEvent(csrftoken) {
             }
 
             deleteBtn.addEventListener('click', () => {
-                console.log('Delete!');
                 fetch('/delete-event', {
                     method: 'PUT',
                     headers: {
@@ -297,7 +303,7 @@ function delete_follower(csrftoken) {
         delete_btn.addEventListener('click', () => {
             user_id = delete_btn.parentNode.id;
             fetch('/delete_follower', {
-                method: 'POST',
+                method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken,

@@ -1,7 +1,7 @@
 import json
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render
 from django.urls import reverse
 from django.http import JsonResponse, HttpResponseNotAllowed
@@ -31,49 +31,52 @@ def check_access(request, user_id):
     
 @login_required
 def month_page(request, user_id):
-    if not check_access(request, user_id):
-        return HttpResponseRedirect(reverse("profile_page", args=(user_id, )))
+    try:
+        if not check_access(request, user_id):
+            return HttpResponseRedirect(reverse("profile_page", args=(user_id, )))
 
-    month_names_nom = [
-    "", "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-    "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
-    ]
+        month_names_nom = [
+        "", "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+        "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+        ]
 
-    list_day_of_week = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+        list_day_of_week = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
 
-    if request.method == 'GET' and 'year' in request.GET and 'month' in request.GET:
-        year = int(request.GET['year'])
-        month = int(request.GET['month'])
-        day = 1
-        today = date(year, month, 1)
-        last_month_date = today - timedelta(days=1)
-        days = calendar.monthrange(today.year, today.month)[1]
-        next_month_date = today + timedelta(days=days)
-    else:
-        today = date.today()
-        first = today.replace(day=1)
-        year, month, day = today.year, today.month, today.day
-        last_month_date = first - timedelta(days=1)
-        days = calendar.monthrange(today.year, today.month)[1]
-        next_month_date = today + timedelta(days=days)
+        if request.method == 'GET' and 'year' in request.GET and 'month' in request.GET:
+            year = int(request.GET['year'])
+            month = int(request.GET['month'])
+            day = 1
+            today = date(year, month, 1)
+            last_month_date = today - timedelta(days=1)
+            days = calendar.monthrange(today.year, today.month)[1]
+            next_month_date = today + timedelta(days=days)
+        else:
+            today = date.today()
+            first = today.replace(day=1)
+            year, month, day = today.year, today.month, today.day
+            last_month_date = first - timedelta(days=1)
+            days = calendar.monthrange(today.year, today.month)[1]
+            next_month_date = today + timedelta(days=days)
 
-    type_date = {
-        "last": {
-            "year": last_month_date.year,
-            "month": last_month_date.month,
-        },
-        "now": {
-            "year": year,
-            "month": month,
-        },
-        "next": {
-            "year": next_month_date.year,
-            "month": next_month_date.month,
+        type_date = {
+            "last": {
+                "year": last_month_date.year,
+                "month": last_month_date.month,
+            },
+            "now": {
+                "year": year,
+                "month": month,
+            },
+            "next": {
+                "year": next_month_date.year,
+                "month": next_month_date.month,
+            }
         }
-    }
 
-    current_user = User.objects.get(id=user_id)
-    res = set_calendar(type_date, list_day_of_week, current_user)
+        current_user = User.objects.get(id=user_id)
+        res = set_calendar(type_date, list_day_of_week, current_user)
+    except:
+        raise Http404("User does not exist")
 
     return render(request, "share_plans/index.html",  {
         'range': res,
@@ -131,19 +134,22 @@ def set_calendar(type_date, list_day_of_week, current_user) :
 
 @login_required
 def day_page(request, user_id):
-    year = int(request.GET['year'])
-    month = int(request.GET['month'])
-    day = int(request.GET['day'])
-    user = User.objects.get(id=user_id)
-    all_events = user.events.all()
-    all_events_day = all_events.filter(date=date(year, month, day))
-    all_events_repeat = all_events.filter(repeat=True)
-    repeat_events = get_repeat_events(all_events_repeat)
-    day_of_week = date(year, month, day).isoweekday()
+    try:
+        year = int(request.GET['year'])
+        month = int(request.GET['month'])
+        day = int(request.GET['day'])
+        user = User.objects.get(id=user_id)
+        all_events = user.events.all()
+        all_events_day = all_events.filter(date=date(year, month, day))
+        all_events_repeat = all_events.filter(repeat=True)
+        repeat_events = get_repeat_events(all_events_repeat)
+        day_of_week = date(year, month, day).isoweekday()
 
-    if repeat_events.get(day_of_week):
-        all_events_repeat = all_events_repeat.filter(pk=repeat_events[day_of_week].id)
-        all_events_day = all_events_day.union(all_events_repeat)
+        if repeat_events.get(day_of_week):
+            all_events_repeat = all_events_repeat.filter(pk=repeat_events[day_of_week].id)
+            all_events_day = all_events_day.union(all_events_repeat)
+    except:
+        raise Http404("User does not exist")
 
     return render(request, "share_plans/day.html",  {
         "year": year,
@@ -154,10 +160,12 @@ def day_page(request, user_id):
         
 @login_required
 def get_data_month(request):
+    if request.method != 'GET':
+        return JsonResponse({"error": "Only GET method is allowed."}, status=405)
+    
     if request.method == 'GET' and 'year' in request.GET and 'month' in request.GET:
         year = int(request.GET['year'])
         month = int(request.GET['month'])
-        day = 1
         today = date(year, month, 1)
         last_month_date = today - timedelta(days=1)
         days = calendar.monthrange(today.year, today.month)[1]
@@ -165,13 +173,13 @@ def get_data_month(request):
     elif request.method == 'GET':
         today = date.today()
         first = today.replace(day=1)
-        year, month, day = today.year, today.month, today.day
+        year, month = today.year, today.month
         last_month_date = first - timedelta(days=1)
         days = calendar.monthrange(today.year, today.month)[1]
         next_month_date = today + timedelta(days=days)
 
-    last_year, last_month, last_day = last_month_date.year, last_month_date.month, last_month_date.day
-    next_year, next_month, next_day = next_month_date.year, next_month_date.month, next_month_date.day
+    last_year, last_month = last_month_date.year, last_month_date.month
+    next_year, next_month = next_month_date.year, next_month_date.month
 
     return JsonResponse({
         "year": year,
@@ -180,7 +188,7 @@ def get_data_month(request):
         "next_month": next_month,
         "last_year": last_year,
         "last_month": last_month
-    }, status=201)
+    }, status=200)
 
 def get_repeat_events(all_events_repeat):
     repeat_events = {}
@@ -237,14 +245,17 @@ def delete_event(request):
 
 @login_required
 def profile_page(request, user_id):
-    user_profile = User.objects.get(pk=user_id)
-    followers_not_approved = Follower.objects.filter(user=user_profile, is_approve=False)
-    followers = Follower.objects.filter(user=user_profile, is_approve=True)
-    following = Follower.objects.filter(follower=user_profile)
-    is_follower = check_follower(request, user_profile)
-    is_approved = check_access(request, user_id)
+    try:
+        user_profile = User.objects.get(pk=user_id)
+        followers_not_approved = Follower.objects.filter(user=user_profile, is_approve=False)
+        followers = Follower.objects.filter(user=user_profile, is_approve=True)
+        following = Follower.objects.filter(follower=user_profile)
+        is_follower = check_follower(request, user_profile)
+        is_approved = check_access(request, user_id)
 
-    is_author = (request.user.id == user_id)
+        is_author = (request.user.id == user_id)
+    except:
+        raise Http404("User does not exist")
 
     return render(request, "share_plans/profile.html", {
         "user_profile": user_profile,
@@ -328,7 +339,7 @@ def search_input(request):
             })
 
 def delete_follower(request):
-    if request.method == 'POST':
+    if request.method == 'DELETE':
         data = json.loads(request.body)
         user_id = int(data.get('user_id'))
 
@@ -340,11 +351,11 @@ def delete_follower(request):
             })
         except:
             return JsonResponse({
-                "error": 'user not found',
+                "error": 'User not found',
             })
         
     return JsonResponse({
-        "error": "Only POST method."
+        "error": "Only DELETE method."
     }, status=400)
 
 def change_profile_page(request):
@@ -359,12 +370,10 @@ def change_profile_page(request):
 def login_view(request):
     if request.method == "POST":
 
-        # Attempt to sign user in
         username = request.POST["username"]
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
 
-        # Check if authentication successful
         if user is not None:
             login(request, user)
             return HttpResponseRedirect(reverse("index"))
@@ -386,7 +395,6 @@ def register(request):
         username = request.POST["username"]
         email = request.POST["email"]
 
-        # Ensure password matches confirmation
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
         if password != confirmation:
@@ -394,7 +402,6 @@ def register(request):
                 "message": "Passwords must match."
             })
 
-        # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
             user.save()

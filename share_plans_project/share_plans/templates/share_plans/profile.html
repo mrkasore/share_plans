@@ -18,8 +18,8 @@
         <a href="/user/{{user_profile.id}}">
             <button class="btn btn-primary">Смотреть расписание</button>
         </a>
-    {% else %}
-        <h6>Заявка отправлена</h6>
+    {% elif is_follower %}
+        <h5>Заявка отправлена</h5>
     {% endif %}
     {% if not is_author %}
         {% if is_follower %}

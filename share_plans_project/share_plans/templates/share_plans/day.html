@@ -25,11 +25,11 @@
                     <input type="hidden" value="{{ day }}" name="day">
                     <div class="time-div">
                         <label>Выберите время: </label>
-                        <input type="time" name="time-event" id="time-event">
+                        <input type="time" name="time-event" id="time-event" required>
                         -
-                        <input type="time" name="time-event_to" id="time-event_to">
+                        <input type="time" name="time-event_to" id="time-event_to" required>
                     </div>
-                    <textarea name="description" id="description"></textarea>
+                    <textarea name="description" id="description" required></textarea>
                     <div style="text-align: center;">
                       <input type="checkbox" id="repeat" name="is-repeat">
                       <label for="repeat">Повторять каждую неделю</label>

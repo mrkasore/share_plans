@@ -65,14 +65,11 @@ html, body {
 
 .day {
     border: 1px solid black;
-}
-
-a {
     color: black;
     text-decoration: none;
 }
 
-a:hover {
+.day:hover {
     color: black;
     text-decoration: none;
 }

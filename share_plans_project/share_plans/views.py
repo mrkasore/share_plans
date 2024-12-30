@@ -1,21 +1,17 @@
 import json
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from calendar import Calendar
 from datetime import date, timedelta, time
 import calendar
-import datetime
 
 from .models import User, Event, Follower
-
-# Create your views here.
 
 def index(request):
     if not request.user.is_authenticated:
@@ -49,80 +45,35 @@ def month_page(request, user_id):
         year = int(request.GET['year'])
         month = int(request.GET['month'])
         day = 1
-        today = datetime.date(year, month, 1)
-        last_month_date = today - datetime.timedelta(days=1)
+        today = date(year, month, 1)
+        last_month_date = today - timedelta(days=1)
         days = calendar.monthrange(today.year, today.month)[1]
         next_month_date = today + timedelta(days=days)
     else:
-        today = datetime.date.today()
+        today = date.today()
         first = today.replace(day=1)
         year, month, day = today.year, today.month, today.day
-        last_month_date = first - datetime.timedelta(days=1)
+        last_month_date = first - timedelta(days=1)
         days = calendar.monthrange(today.year, today.month)[1]
         next_month_date = today + timedelta(days=days)
 
-    last_year, last_month, last_day = last_month_date.year, last_month_date.month, last_month_date.day
-    next_year, next_month, next_day = next_month_date.year, next_month_date.month, next_month_date.day
+    type_date = {
+        "last": {
+            "year": last_month_date.year,
+            "month": last_month_date.month,
+        },
+        "now": {
+            "year": year,
+            "month": month,
+        },
+        "next": {
+            "year": next_month_date.year,
+            "month": next_month_date.month,
+        }
+    }
 
-
-    cal = Calendar()
-    days_prev = cal.monthdayscalendar(last_year, last_month)[-1]
-    days_current = cal.monthdayscalendar(year, month)
-    days_next = cal.monthdayscalendar(next_year, next_month)[0]
-    res_days_next = [day for day in days_next if day != 0]
-    res = []
-    is_inception = True
     current_user = User.objects.get(id=user_id)
-    all_events_repeat = current_user.events.all().filter(repeat=True)
-    repeat_events = [0 for _ in range(8)]
-
-    for event in all_events_repeat:
-        repeat_events[event.date.isoweekday()] = event
-
-    for week in days_current:
-        i = 0
-        for day in week:
-            day_of_week = list_day_of_week[i]
-            i += 1
-
-            if repeat_events[i]:
-                all_events_repeat = current_user.events.filter(pk=repeat_events[i].id)
-            else:
-                all_events_repeat = current_user.events.none() 
-
-            if day == 0 and is_inception:
-                day = days_prev.pop(0)
-                all_events = current_user.events.all().filter(date=date(last_year, last_month, day))
-                all_events = all_events.union(all_events_repeat)
-                res.append({
-                    "day": day,
-                    "month": last_month,
-                    "year": last_year,
-                    "events": all_events.order_by('time'),
-                    "day_of_week": day_of_week
-                    })
-            elif day == 0:
-                day = res_days_next.pop(0)
-                all_events = current_user.events.all().filter(date=date(next_year, next_month, day))
-                all_events = all_events.union(all_events_repeat)
-                res.append({
-                    "day": day,
-                    "month": next_month,
-                    "year": next_year,
-                    "events": all_events.order_by('time'),
-                    "day_of_week": day_of_week
-                    })
-            elif day != 0:
-                all_events = current_user.events.all().filter(date=date(year, month, day))
-                all_events = all_events.union(all_events_repeat)
-                res.append({
-                    "day": day,
-                    "month": month,
-                    "year": year,
-                    "events": all_events.order_by('time'),
-                    "day_of_week": day_of_week
-                    })
-                is_inception = False
+    res = set_calendar(type_date, list_day_of_week, current_user)
 
     return render(request, "share_plans/index.html",  {
         'range': res,
@@ -132,56 +83,90 @@ def month_page(request, user_id):
         'current_user': current_user
     })
 
+def set_calendar(type_date, list_day_of_week, current_user) :
+    cal = Calendar()
+    days_prev = cal.monthdayscalendar(type_date["last"]["year"], type_date["last"]["month"])[-1]
+    days_current = cal.monthdayscalendar(type_date["now"]["year"], type_date["now"]["month"])
+    days_next = cal.monthdayscalendar(type_date["next"]["year"], type_date["next"]["month"])[0]
+    res_days_next = [day for day in days_next if day != 0]
+    res = []
+    is_inception = True
+    all_events = current_user.events.all()
+    all_events_repeat = all_events.filter(repeat=True)
+    repeat_events = get_repeat_events(all_events_repeat)
+
+    for week in days_current:
+        for i, day in enumerate(week):
+            day_of_week = list_day_of_week[i]
+
+            if day == 0 and is_inception:
+                day = days_prev.pop(0)
+                all_events_day = all_events.filter(date=date(type_date["last"]["year"], type_date["last"]["month"], day))
+                cur_month = type_date["last"]["month"]
+                cur_year = type_date["last"]["year"]
+            elif day == 0:
+                day = res_days_next.pop(0)
+                all_events_day = all_events.filter(date=date(type_date["next"]["year"], type_date["next"]["month"], day))
+                cur_month = type_date["next"]["month"]
+                cur_year = type_date["next"]["year"]
+            elif day != 0:
+                all_events_day = all_events.filter(date=date(type_date["now"]["year"], type_date["now"]["month"], day))
+                cur_month = type_date["now"]["month"]
+                cur_year = type_date["now"]["year"]
+                is_inception = False
+
+            if repeat_events.get(i + 1):
+                all_events_repeat = all_events.filter(pk=repeat_events[i + 1].id)
+                all_events_day = all_events_day.union(all_events_repeat)
+
+            res.append({
+                "day": day,
+                "month": cur_month,
+                "year": cur_year,
+                "events": all_events_day.order_by('time'),
+                "day_of_week": day_of_week
+            })
+    
+    return res
+
 @login_required
 def day_page(request, user_id):
-    if request.method == 'GET':
-        year = int(request.GET['year'])
-        month = int(request.GET['month'])
-        day = int(request.GET['day'])
-        user = User.objects.get(id=user_id)
-        all_events = user.events.all().filter(date=date(year, month, day))
+    year = int(request.GET['year'])
+    month = int(request.GET['month'])
+    day = int(request.GET['day'])
+    user = User.objects.get(id=user_id)
+    all_events = user.events.all()
+    all_events_day = all_events.filter(date=date(year, month, day))
+    all_events_repeat = all_events.filter(repeat=True)
+    repeat_events = get_repeat_events(all_events_repeat)
+    day_of_week = date(year, month, day).isoweekday()
 
-        all_events_repeat = user.events.all().filter(repeat=True)
+    if repeat_events.get(day_of_week):
+        all_events_repeat = all_events_repeat.filter(pk=repeat_events[day_of_week].id)
+        all_events_day = all_events_day.union(all_events_repeat)
 
-        repeat_events = [0 for _ in range(8)]
-        for event in all_events_repeat:
-            repeat_events[event.date.isoweekday()] = event
-
-        day_of_week = date(year, month, day).isoweekday()
-
-        if repeat_events[day_of_week]:
-            all_events_repeat = user.events.filter(pk=repeat_events[day_of_week].id)
-        else:
-            all_events_repeat = user.events.none()
-
-        all_events = all_events.union(all_events_repeat)
-
-        return render(request, "share_plans/day.html",  {
-            "year": year,
-            "month": month,
-            "day": day,
-            "all_events": all_events.order_by('time')            
-        })
-    else:
-        return JsonResponse({
-            "error": "Only GET method."
-        }, status=400)
-
+    return render(request, "share_plans/day.html",  {
+        "year": year,
+        "month": month,
+        "day": day,
+        "all_events": all_events_day.order_by('time')            
+    })
+        
 @login_required
 def get_data_month(request):
     if request.method == 'GET' and 'year' in request.GET and 'month' in request.GET:
         year = int(request.GET['year'])
         month = int(request.GET['month'])
         day = 1
-        today = datetime.date(year, month, 1)
-        last_month_date = today - datetime.timedelta(days=1)
+        today = date(year, month, 1)
+        last_month_date = today - timedelta(days=1)
         days = calendar.monthrange(today.year, today.month)[1]
         next_month_date = today + timedelta(days=days)
     elif request.method == 'GET':
-        today = datetime.date.today()
+        today = date.today()
         first = today.replace(day=1)
         year, month, day = today.year, today.month, today.day
-        last_month_date = first - datetime.timedelta(days=1)
+        last_month_date = first - timedelta(days=1)
         days = calendar.monthrange(today.year, today.month)[1]
         next_month_date = today + timedelta(days=days)
 
@@ -196,6 +181,14 @@ def get_data_month(request):
         "last_year": last_year,
         "last_month": last_month
     }, status=201)
+
+def get_repeat_events(all_events_repeat):
+    repeat_events = {}
+
+    for event in all_events_repeat:
+        repeat_events[event.date.isoweekday()] = event
+
+    return repeat_events
 
 def add_event(request):
     if request.method == "POST":
@@ -227,18 +220,12 @@ def add_event(request):
         event.save()
         return HttpResponseRedirect(f'/user/{request.user.id}/date?year={year}&month={month}&day={day}')
     
-    return JsonResponse({
-        "error": "Only POST method."
-    }, status=400)
+    return HttpResponseNotAllowed(["POST"], "Method not allowed. Use POST.")
     
 def delete_event(request):
     if request.method == "PUT":
         data = json.loads(request.body)
-        day = int(data.get("day"))
-        month = int(data.get("month"))
-        year = int(data.get("year"))
         event_id = data.get("event_id")
-        event = Event.objects.get(pk=int(data.get("event_id"))).delete()
         
         return JsonResponse({
             "event_id": event_id,
